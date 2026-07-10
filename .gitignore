@@ -1,0 +1,10 @@
+node_modules/
+.next/
+*.log
+*.err
+.env
+uploads/
+test-data.csv
+dist/
+*.tsbuildinfo
+next-env.d.ts

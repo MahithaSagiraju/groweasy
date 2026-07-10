@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: groweasy-csv-importer-backend
+    env: node
+    buildCommand: cd backend && npm ci && npm run build
+    startCommand: cd backend && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://your-frontend-url.vercel.app
+      - key: MAX_FILE_SIZE_MB
+        value: "50"
+      - key: BATCH_SIZE
+        value: "10"
+      - key: MAX_RETRIES
+        value: "3"
+      - key: RETRY_DELAY_MS
+        value: "1000"
