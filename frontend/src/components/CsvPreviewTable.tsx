@@ -20,9 +20,10 @@ export function CsvPreviewTable({ data, columns }: CsvPreviewTableProps) {
 
   const columnDefs: ColumnDef<Record<string, string>>[] = useMemo(
     () =>
-      columns.map((col) => ({
+      columns.map((col, i) => ({
+        id: `col_${i}`,
         accessorKey: col,
-        header: col,
+        header: col || `Column ${i + 1}`,
         cell: (info) => {
           const value = info.getValue() as string;
           return (
