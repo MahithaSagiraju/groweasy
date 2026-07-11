@@ -3,11 +3,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import multer from 'multer';
+import fs from 'fs';
 import path from 'path';
 import { ZodError } from 'zod';
 import { config } from './utils/config';
 import { logger, HttpError } from './utils/helpers';
 import { uploadCsv, importData, getProgress } from './controllers/importController';
+
+fs.mkdirSync(config.uploadDir, { recursive: true });
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -52,7 +55,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   } else if (err?.message?.includes('CSV parse error') || err?.message?.includes('Only CSV')) {
     res.status(400).json({ error: err.message });
   } else {
-    res.status(500).json({ error: 'Internal error', message: config.nodeEnv === 'development' ? err.message : undefined });
+    res.status(500).json({ error: 'Internal error', message: err.message });
   }
 });
 
