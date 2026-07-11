@@ -26,7 +26,7 @@ const app = express();
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: [config.corsOrigin, 'http://localhost:3000'].filter(Boolean),
+  origin: true,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 }));
