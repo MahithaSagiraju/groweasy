@@ -16,7 +16,7 @@ function getModel() {
 
 const prompt = `You convert CSV rows to CRM records. Given rows of data, map them to this schema:
 
-created_at (ISO date), name, email (first only, rest to crm_note), country_code, mobile_without_country_code (first only, rest to crm_note), company, city, state, country, lead_owner, crm_status (GOOD_LEAD_FOLLOW_UP|DID_NOT_CONNECT|BAD_LEAD|SALE_DONE or blank), crm_note, data_source (leads_on_demand|meridian_tower|eden_park|varah_swamy|sarjapur_plots or blank), possession_time, description
+created_at (ISO date), name, email (first only, rest to crm_note), country_code, mobile_without_country_code (first only, rest to crm_note), company, city, state, country, lead_owner, crm_status (GOOD_LEAD_FOLLOW_UP|DID_NOT_CONNECT|BAD_LEAD|SALE_DONE or blank), crm_note, data_source (leads_on_demand|meridian_tower|eden_park|varah_swamy|sarjapur_plots or blank), possession_time, budget, description
 
 Rules: use only those enum values. First email goes to email field, rest to crm_note. Same for mobile. Skip rows with no email or mobile. Infer from column synonyms (Full Name->name, Phone->mobile, etc). Never make up data. Return JSON: { "imported": [...], "skipped": [{ "row": N, "reason": "...", "data": {...} }] }`;
 

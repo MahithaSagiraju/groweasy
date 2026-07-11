@@ -24,6 +24,7 @@ const CrmRecordSchema = z.object({
   crm_note: z.string(),
   data_source: z.enum(dataSourceValues),
   possession_time: z.string(),
+  budget: z.string(),
   description: z.string(),
 });
 
@@ -44,6 +45,7 @@ describe('CrmRecordSchema', () => {
       crm_note: '',
       data_source: 'leads_on_demand',
       possession_time: '',
+      budget: '',
       description: '',
     };
     const result = CrmRecordSchema.safeParse(record);
@@ -66,6 +68,7 @@ describe('CrmRecordSchema', () => {
       crm_note: '',
       data_source: '',
       possession_time: '',
+      budget: '',
       description: '',
     };
     const result = CrmRecordSchema.safeParse(record);
@@ -88,6 +91,7 @@ describe('CrmRecordSchema', () => {
       crm_note: '',
       data_source: 'invalid_source',
       possession_time: '',
+      budget: '',
       description: '',
     };
     const result = CrmRecordSchema.safeParse(record);
@@ -110,6 +114,7 @@ describe('CrmRecordSchema', () => {
       crm_note: '',
       data_source: '',
       possession_time: '',
+      budget: '',
       description: '',
     };
     const result = CrmRecordSchema.safeParse(record);

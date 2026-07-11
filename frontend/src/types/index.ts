@@ -28,6 +28,7 @@ export interface CrmRecord {
   crm_note: string;
   data_source: DataSource;
   possession_time: string;
+  budget: string;
   description: string;
 }
 
