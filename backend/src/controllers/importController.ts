@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { saveUpload, buildUploadResponse } from '../utils/csv';
-import { mapBatchToCrm } from '../services/llm';
+import { mapRows } from '../services/mapper';
 import { HttpError, logger } from '../utils/helpers';
 import { ImportResult } from '../types';
 import { config } from '../utils/config';
@@ -67,40 +67,26 @@ export async function importData(req: Request, res: Response, next: NextFunction
 
 async function runImport(session: any, sessionId: string) {
   const { rows, progress } = session;
-  const allImported: ImportResult['imported'] = [];
-  const allSkipped: ImportResult['skipped'] = [];
+  progress.batch = 1;
+  progress.processed = rows.length;
 
-  for (let i = 0; i < rows.length; i += config.batchSize) {
-    const batch = rows.slice(i, i + config.batchSize);
-    try {
-      const result = await mapBatchToCrm(batch, Math.floor(i / config.batchSize));
-      allImported.push(...result.imported);
-      allSkipped.push(...result.skipped);
-
-      progress.batch = Math.floor(i / config.batchSize) + 1;
-      progress.processed = Math.min(i + config.batchSize, rows.length);
-      progress.imported = allImported.length;
-      progress.skipped = allSkipped.length;
-    } catch (err: any) {
-      logger.error({ sessionId, batch: i, err }, 'Batch failed');
-      progress.status = 'error';
-      session.error = err?.message || 'Batch failed';
-      return;
-    }
-  }
+  const result = mapRows(rows);
 
   const seen = new Set<string>();
   const deduped: ImportResult['imported'] = [];
-  for (const r of allImported) {
+  for (const r of result.imported) {
     const key = r.email || r.mobile_without_country_code;
     if (key && !seen.has(key)) { seen.add(key); deduped.push(r); }
   }
 
   progress.status = 'completed';
-  progress.processed = rows.length;
   progress.imported = deduped.length;
-  progress.skipped = allSkipped.length;
-  session.result = { imported: deduped, skipped: allSkipped };
+  progress.skipped = result.skipped.length;
+  session.result = {
+    imported: deduped,
+    skipped: result.skipped,
+    summary: { total: rows.length, imported: deduped.length, skipped: result.skipped.length },
+  };
 }
 
 export async function getProgress(req: Request, res: Response, next: NextFunction) {

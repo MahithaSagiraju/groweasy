@@ -1,17 +1,16 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import { config } from '../utils/config';
 import { logger } from '../utils/helpers';
 import { ImportResult } from '../types';
 
-let model: any = null;
+let openai: OpenAI | null = null;
 
-function getModel() {
-  if (model) return model;
-  if (!config.geminiApiKey) throw new Error('GEMINI_API_KEY not set');
-  const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-  model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-  logger.info('Gemini model ready');
-  return model;
+function getClient() {
+  if (openai) return openai;
+  if (!config.openaiApiKey) throw new Error('OPENAI_API_KEY not set');
+  openai = new OpenAI({ apiKey: config.openaiApiKey });
+  logger.info('OpenAI client ready');
+  return openai;
 }
 
 const prompt = `You convert CSV rows to CRM records. Given rows of data, map them to this schema:
@@ -24,20 +23,25 @@ export async function mapBatchToCrm(
   batch: Record<string, string>[],
   batchIndex: number
 ): Promise<ImportResult> {
-  const m = getModel();
+  const client = getClient();
   const body = JSON.stringify(batch, null, 2);
 
   let lastErr: Error | null = null;
   for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
     try {
-      const resp = await m.generateContent(`${prompt}\n\nBatch ${batchIndex + 1}:\n${body}`);
-      const text = resp.response.text();
-      const match = text.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error('No JSON in response');
+      const resp = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: prompt },
+          { role: 'user', content: `Batch ${batchIndex + 1}:\n${body}` },
+        ],
+        temperature: 0.1,
+        response_format: { type: 'json_object' },
+      });
 
-      const parsed = JSON.parse(match[0]);
+      const text = resp.choices[0]?.message?.content || '';
+      const parsed = JSON.parse(text);
       if (!Array.isArray(parsed.imported)) throw new Error('Missing imported array');
-
       if (!Array.isArray(parsed.skipped)) parsed.skipped = [];
 
       const base = batchIndex * config.batchSize;
