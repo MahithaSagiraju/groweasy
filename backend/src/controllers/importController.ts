@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { saveUpload, buildUploadResponse } from '../utils/csv';
 import { mapBatchToCrm } from '../services/llm';
-import { AppError } from '../middleware/errorHandler';
-import { logger } from '../utils/logger';
+import { HttpError, logger } from '../utils/helpers';
 import { ImportResult } from '../types';
 import { config } from '../utils/config';
 
@@ -19,7 +18,7 @@ const sessions: Record<string, {
 
 export async function uploadCsv(req: Request, res: Response, next: NextFunction) {
   try {
-    if (!req.file) throw new AppError(400, 'No file uploaded');
+    if (!req.file) throw new HttpError(400, 'No file uploaded');
 
     const result = await saveUpload(req.file);
     const response = buildUploadResponse(result);
@@ -45,12 +44,12 @@ export async function uploadCsv(req: Request, res: Response, next: NextFunction)
 export async function importData(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.body;
-    if (!id) throw new AppError(400, 'Missing id');
+    if (!id) throw new HttpError(400, 'Missing id');
 
     const session = sessions[id];
-    if (!session) throw new AppError(404, 'Session not found');
+    if (!session) throw new HttpError(404, 'Session not found');
     if (session.progress.status === 'processing') {
-      throw new AppError(409, 'Already processing');
+      throw new HttpError(409, 'Already processing');
     }
 
     session.progress.status = 'processing';
@@ -108,7 +107,7 @@ export async function getProgress(req: Request, res: Response, next: NextFunctio
   try {
     const id = req.params.id as string;
     const session = sessions[id];
-    if (!session) return next(new AppError(404, 'Session not found'));
+    if (!session) return next(new HttpError(404, 'Session not found'));
 
     res.json({
       progress: session.progress,

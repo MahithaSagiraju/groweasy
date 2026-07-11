@@ -39,43 +39,41 @@ export function ImportResults({ result, filename }: ImportResultsProps) {
           onClick={() => exportAsJson(imported, filename)}
           className="px-4 py-2 text-sm rounded-lg bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] transition-colors"
         >
-          Export Imported JSON
+          Download JSON
         </button>
         {skipped.length > 0 && (
-          <button
-            onClick={() => downloadSkippedRecords(skipped, filename)}
-            className="px-4 py-2 text-sm rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors"
-          >
-            Download Skipped Records
-          </button>
+          <>
+            <button
+              onClick={() => downloadSkippedRecords(skipped, filename)}
+              className="px-4 py-2 text-sm rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors"
+            >
+              Download Skipped CSV
+            </button>
+          </>
         )}
       </div>
 
       {skipped.length > 0 && (
-        <details className="mt-4">
+        <details>
           <summary className="cursor-pointer text-sm font-medium text-yellow-600 dark:text-yellow-400">
-            View {skipped.length} skipped record(s)
+            {skipped.length} record(s) skipped — click for details
           </summary>
-          <div className="mt-2 max-h-60 overflow-y-auto">
+          <div className="mt-2 max-h-60 overflow-y-auto border border-[var(--border)] rounded">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-2 px-2">Row</th>
-                  <th className="text-left py-2 px-2">Reason</th>
-                  <th className="text-left py-2 px-2">Data</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+                  <th className="text-left py-2 px-3">Row</th>
+                  <th className="text-left py-2 px-3">Reason</th>
+                  <th className="text-left py-2 px-3">Data</th>
                 </tr>
               </thead>
               <tbody>
-                {skipped.map((skip) => (
-                  <tr key={skip.row} className="border-b border-[var(--border)]">
-                    <td className="py-2 px-2">{skip.row}</td>
-                    <td className="py-2 px-2 text-red-600 dark:text-red-400">
-                      {skip.reason}
-                    </td>
-                    <td className="py-2 px-2">
-                      <pre className="text-xs truncate max-w-[300px]">
-                        {JSON.stringify(skip.data)}
-                      </pre>
+                {skipped.map((s, idx) => (
+                  <tr key={idx} className="border-b border-[var(--border)] hover:bg-[var(--muted)]">
+                    <td className="py-2 px-3">{s.row}</td>
+                    <td className="py-2 px-3 text-red-600 dark:text-red-400">{s.reason}</td>
+                    <td className="py-2 px-3">
+                      <code className="text-xs">{JSON.stringify(s.data).slice(0, 80)}</code>
                     </td>
                   </tr>
                 ))}

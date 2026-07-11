@@ -1,17 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { AppError } from '../middleware/errorHandler';
+import { HttpError } from '../utils/helpers';
 
-describe('AppError', () => {
-  it('should create an error with status code and message', () => {
-    const error = new AppError(404, 'Not found');
-    expect(error.statusCode).toBe(404);
-    expect(error.message).toBe('Not found');
-    expect(error.name).toBe('AppError');
+describe('HttpError', () => {
+  it('should create an error with status and message', () => {
+    const err = new HttpError(404, 'Not found');
+    expect(err.status).toBe(404);
+    expect(err.message).toBe('Not found');
+    expect(err.name).toBe('HttpError');
   });
 
   it('should include optional details', () => {
     const details = { field: 'email' };
-    const error = new AppError(400, 'Validation failed', details);
-    expect(error.details).toEqual(details);
+    const err = new HttpError(400, 'fail', details);
+    expect(err.details).toEqual(details);
   });
 });

@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../utils/config';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/helpers';
 import { ImportResult } from '../types';
 
 let model: any = null;

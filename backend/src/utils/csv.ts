@@ -3,32 +3,27 @@ import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { config } from './config';
-import { CrmRecord, UploadResponse } from '../types';
+import { UploadResponse } from '../types';
+import { logger } from './helpers';
 
 export function parseCsvFile(filePath: string): Promise<Record<string, string>[]> {
   return new Promise((resolve, reject) => {
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    Papa.parse(fileContent, {
+    const rows: Record<string, string>[] = [];
+    const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+    Papa.parse(stream, {
       header: true,
       skipEmptyLines: true,
       transformHeader: (h) => h.trim(),
-      complete: (results) => {
-        if (results.errors.length > 0) {
-          const criticalErrors = results.errors.filter(
-            (e) => e.type !== 'FieldMismatch'
-          );
-          if (criticalErrors.length > 0) {
-            reject(
-              new Error(
-                `CSV parse error: ${criticalErrors.map((e) => e.message).join(', ')}`
-              )
-            );
-            return;
-          }
+      step: (results) => {
+        if (results.data && typeof results.data === 'object' && Object.keys(results.data as object).length > 0) {
+          rows.push(results.data as Record<string, string>);
         }
-        resolve(results.data as Record<string, string>[]);
       },
-      error: (error: Error) => reject(new Error(`CSV parse error: ${error.message}`)),
+      error: (err: Error) => reject(new Error(`CSV parse error: ${err.message}`)),
+      complete: () => {
+        logger.info({ rows: rows.length, file: path.basename(filePath) }, 'csv parsed');
+        resolve(rows);
+      },
     });
   });
 }
