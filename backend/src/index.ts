@@ -25,7 +25,11 @@ const app = express();
 
 app.use(helmet());
 app.use(compression());
-app.use(cors({ origin: config.corsOrigin, methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
+app.use(cors({
+  origin: [config.corsOrigin, 'http://localhost:3000'].filter(Boolean),
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+}));
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true }));
 
