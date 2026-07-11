@@ -23,7 +23,12 @@ const upload = multer({
 
 const app = express();
 
-app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false,
+}));
 app.use(compression());
 app.use(cors({
   origin: true,
