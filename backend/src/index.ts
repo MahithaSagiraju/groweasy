@@ -55,7 +55,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   } else if (err?.message?.includes('CSV parse error') || err?.message?.includes('Only CSV')) {
     res.status(400).json({ error: err.message });
   } else {
-    res.status(500).json({ error: 'Internal error', message: err.message });
+    res.status(500).json({ error: 'Internal error', message: config.nodeEnv === 'development' ? err.message : undefined });
   }
 });
 
